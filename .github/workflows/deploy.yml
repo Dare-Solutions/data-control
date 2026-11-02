@@ -52,7 +52,8 @@ jobs:
           fi
 
   publish:
-    name: ${{ startsWith(github.ref, 'refs/tags/') && 'Production (20 %)' || 'Piste interne' }}
+    # Piste interne sur main, production (20 %) sur un tag vX.Y.Z.
+    name: Publier
     needs: secrets
     if: needs.secrets.outputs.ready == 'true'
     runs-on: ubuntu-latest
