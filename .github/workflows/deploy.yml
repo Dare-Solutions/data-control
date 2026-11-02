@@ -1,0 +1,144 @@
+# Publication automatique sur Google Play.
+#
+#   push sur main            → tests, AAB signé, envoi sur la piste « internal »
+#   tag vX.Y.Z               → tests, AAB signé, envoi en production à 20 %
+#                              (déploiement progressif ; voir rollout.yml pour élargir)
+#
+# Secrets du dépôt :
+#   UPLOAD_KEYSTORE_BASE64, UPLOAD_KEYSTORE_PASSWORD, UPLOAD_KEY_ALIAS : clé d'envoi
+#   PLAY_SERVICE_ACCOUNT_JSON : clé JSON du compte de service Google Play
+#
+# Le code de version (versionCode) vient du numéro d'exécution de ce workflow,
+# avec un décalage pour rester au-dessus des envois manuels : jamais de doublon.
+
+name: Publier sur Google Play
+
+on:
+  push:
+    branches: [main]
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+
+concurrency:
+  group: play-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: "3.47.8"
+  PACKAGE_NAME: com.oseeeb.flux
+  VERSION_CODE_OFFSET: 100
+
+jobs:
+  secrets:
+    name: Secrets présents ?
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
+          UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          missing=""
+          [ -z "$UPLOAD_KEYSTORE_BASE64" ] && missing="$missing UPLOAD_KEYSTORE_BASE64"
+          [ -z "$UPLOAD_KEYSTORE_PASSWORD" ] && missing="$missing UPLOAD_KEYSTORE_PASSWORD"
+          [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ] && missing="$missing PLAY_SERVICE_ACCOUNT_JSON"
+          if [ -n "$missing" ]; then
+            echo "::warning::Secrets manquants :$missing. Rien n'est publié sur Google Play."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    name: ${{ startsWith(github.ref, 'refs/tags/') && 'Production (20 %)' || 'Piste interne' }}
+    needs: secrets
+    if: needs.secrets.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    env:
+      UPLOAD_KEYSTORE_BASE64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
+      UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+      UPLOAD_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+      - name: Déterminer la version
+        id: version
+        run: |
+          # Nom de version : le tag (v1.2.3 → 1.2.3), sinon celui de pubspec.yaml.
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            name="${GITHUB_REF#refs/tags/v}"
+          else
+            name=$(sed -n 's/^version: *\([0-9.]*\).*/\1/p' pubspec.yaml)
+          fi
+          code=$(( ${{ env.VERSION_CODE_OFFSET }} + ${{ github.run_number }} ))
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "Version $name (code $code)"
+
+      - name: Installer la clé d'envoi
+        run: |
+          echo "$UPLOAD_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          echo "UPLOAD_KEYSTORE_PATH=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+
+      - name: Construire l'AAB signé
+        run: |
+          set -o pipefail
+          if ! flutter build appbundle --release \
+              --build-name "${{ steps.version.outputs.name }}" \
+              --build-number "${{ steps.version.outputs.code }}" 2>&1 | tee build.log; then
+            grep -E "^e: |error:|What went wrong|Execution failed" build.log | head -10 | while read -r line; do
+              echo "::error::$line"
+            done
+            exit 1
+          fi
+
+      - name: Vérifier la signature
+        run: keytool -printcert -jarfile build/app/outputs/bundle/release/app-release.aab | grep -E "Owner|SHA256" | head -3
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flux-aab-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 90
+
+      - name: Envoyer sur la piste interne
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.PACKAGE_NAME }}
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
+          releaseName: ${{ steps.version.outputs.name }} (${{ steps.version.outputs.code }})
+          whatsNewDirectory: distribution/whatsnew
+
+      - name: Envoyer en production (déploiement progressif à 20 %)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.PACKAGE_NAME }}
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: production
+          status: inProgress
+          userFraction: 0.2
+          releaseName: ${{ steps.version.outputs.name }} (${{ steps.version.outputs.code }})
+          whatsNewDirectory: distribution/whatsnew

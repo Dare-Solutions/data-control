@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Politique de confidentialité – Flux</title>
+<style>
+:root{color-scheme:light dark;--bg:#F4F6FA;--fg:#0E1424;--soft:#3B4458;--card:#fff;--line:#E3E7EF;--accent:#3F5C00}
+@media (prefers-color-scheme:dark){:root{--bg:#0B0F1A;--fg:#F2F5FA;--soft:#C5CCDA;--card:#151B2B;--line:#232B40;--accent:#C6F432}}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:40px 20px 64px}
+h1{font-size:30px;line-height:1.2;margin:0 0 8px}h2{font-size:20px;margin:32px 0 8px}
+p,li{color:var(--soft)}strong{color:var(--fg)}code{font-size:.9em;background:var(--card);border:1px solid var(--line);padding:1px 5px;border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:14px;display:block;overflow-x:auto}th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}th{color:var(--fg)}
+ul{padding-left:22px}em{color:var(--soft)}
+</style>
+</head>
+<body><main>
+<h1>Politique de confidentialité — Flux</h1>
+<p><em>Dernière mise à jour : 2 novembre 2026</em></p>
+<p>Flux est une application Android et iOS qui affiche, en direct, le débit des données de votre téléphone, canal par canal (Wi-Fi, réseau mobile, USB, Bluetooth) et, sur Android, la part de chaque application. Cette politique explique ce que Flux fait, et ne fait pas, de vos données.</p>
+<h2>En bref</h2>
+<ul><li><strong>Flux n&#x27;envoie aucune donnée.</strong> Sur Android, l&#x27;application ne demande pas la permission d&#x27;accéder à Internet : elle ne peut techniquement rien transmettre, à personne.</li><li><strong>Flux ne lit pas le contenu de votre trafic.</strong> Elle ne lit que des compteurs d&#x27;octets fournis par le système (combien, et par où).</li><li><strong>Flux n&#x27;enregistre rien par défaut.</strong> Les mesures restent en mémoire pendant une capture et disparaissent après l&#x27;écran de résumé.</li><li><strong>Pas de compte, pas d&#x27;inscription, pas de publicité, pas de suivi.</strong></li></ul>
+<h2>Ce que Flux lit sur votre téléphone</h2>
+<table><thead><tr><th>Donnée</th><th>D&#x27;où elle vient</th><th>À quoi elle sert</th><th>Où elle va</th></tr></thead><tbody><tr><td>Compteurs d&#x27;octets de chaque canal (Wi-Fi, mobile, USB, Bluetooth)</td><td>Le système (Android : <code>TrafficStats</code>, interfaces réseau ; iOS : interfaces réseau)</td><td>Calculer le débit et les volumes pendant une capture</td><td>En mémoire pendant la capture ; effacés à l&#x27;arrêt, sauf le résumé si vous activez l&#x27;historique</td></tr><tr><td>État des canaux (connecté, Bluetooth activé, VPN actif)</td><td>Le système</td><td>Afficher l&#x27;état de chaque canal</td><td>Jamais conservé</td></tr><tr><td>Consommation de données de chaque application (Android seulement, avec l&#x27;accès « Données d&#x27;utilisation »)</td><td>Les statistiques d&#x27;utilisation réseau qu&#x27;Android tient déjà pour chaque application</td><td>Montrer quelles applications consomment, pendant une capture ou sur les derniers jours</td><td>Lue à l&#x27;affichage ; conservée dans le résumé d&#x27;une capture seulement si vous activez l&#x27;historique</td></tr><tr><td>Noms et icônes des applications installées (Android)</td><td>Le système</td><td>Afficher les applications dans la liste</td><td>Jamais conservé (les icônes sont relues à l&#x27;affichage)</td></tr></tbody></table>
+<p>Flux ne lit ni le contenu de vos communications, ni les sites visités, ni les identifiants de votre appareil, ni votre position, ni vos contacts.</p>
+<h2>Ce que Flux garde sur votre téléphone</h2>
+<ul><li><strong>Vos réglages</strong> (unités, thème, canaux affichés, arrêt automatique, écran allumé, historique activé ou non).</li><li><strong>Pendant une capture</strong> : son point de départ et les totaux en cours, pour que la capture survive si le système ferme l&#x27;application. Ces informations sont effacées à l&#x27;arrêt de la capture.</li><li><strong>Si vous activez l&#x27;historique</strong> (désactivé par défaut) : le résumé de chaque capture, c&#x27;est-à-dire la date, la durée, les volumes par canal et, sur Android, la part de chaque application (nom de l&#x27;application et volumes). Au plus 500 captures sont gardées. Vous pouvez supprimer une capture, tout effacer, ou désactiver l&#x27;historique, ce qui efface tout.</li></ul>
+<p>Ces données restent dans l&#x27;espace privé de l&#x27;application sur votre téléphone. Sur Android, la sauvegarde automatique vers le cloud est désactivée pour Flux. Sur iPhone, elles peuvent faire partie des sauvegardes de l&#x27;appareil (iCloud ou ordinateur) que vous choisissez de faire ; elles sont alors protégées par Apple comme le reste de votre sauvegarde.</p>
+<h2>Ce que Flux ne fait pas</h2>
+<ul><li>Aucune donnée n&#x27;est transmise à l&#x27;éditeur de Flux, ni à un tiers.</li><li>Aucun outil d&#x27;analyse, de mesure d&#x27;audience, de publicité ou de rapport de plantage n&#x27;est intégré.</li><li>Aucune donnée n&#x27;est vendue, partagée ou utilisée à d&#x27;autres fins.</li></ul>
+<h2>Permissions demandées</h2>
+<p><strong>Android</strong></p>
+<ul><li><em>État du réseau</em> (<code>ACCESS_NETWORK_STATE</code>) : savoir quels canaux sont connectés. Accordée automatiquement.</li><li><em>Bluetooth</em> (Android 11 et avant) : savoir si le Bluetooth est activé. Flux ne se connecte à aucun appareil.</li><li><em>Service au premier plan</em> et <em>verrou de veille</em> : pour que la capture continue quand vous utilisez d&#x27;autres applications ou éteignez l&#x27;écran, avec une notification visible et un bouton STOP. Actifs seulement pendant une capture que vous avez lancée.</li><li><em>Notifications</em> (Android 13 et plus) : pour afficher la notification de capture en cours. Si vous refusez, la capture fonctionne quand même.</li><li><em>Accès aux données d&#x27;utilisation</em> (<code>PACKAGE_USAGE_STATS</code>) : facultatif, demandé seulement si vous ouvrez l&#x27;écran « Consommation par app ». Il sert uniquement à lire la consommation réseau de chaque application, telle qu&#x27;Android la compte. Flux ne lit pas quelles applications vous ouvrez ni combien de temps vous les utilisez.</li><li><em>Internet</em> : <strong>non demandée</strong>, volontairement.</li></ul>
+<p><strong>iOS</strong></p>
+<p>Aucune permission n&#x27;est demandée. Flux lit les compteurs réseau du système. iOS ne permet pas la consommation par application ni la mesure continue en arrière-plan.</p>
+<h2>Enfants</h2>
+<p>Flux ne collecte aucune donnée et ne contient ni publicité ni achat intégré. Elle peut être utilisée par tous les âges.</p>
+<h2>Vos droits</h2>
+<p>Toutes les données que Flux manipule sont sur votre téléphone et sous votre contrôle : vous pouvez les consulter dans l&#x27;application, les supprimer (historique), ou désinstaller l&#x27;application, ce qui efface tout. Flux ne détenant aucune donnée vous concernant, il n&#x27;y a rien à demander à son éditeur ; nous répondons néanmoins volontiers à vos questions à l&#x27;adresse ci-dessous.</p>
+<h2>Modifications</h2>
+<p>Si cette politique change, la nouvelle version sera publiée à la même adresse, avec sa date de mise à jour, et l&#x27;application la mentionnera dans ses notes de version.</p>
+<h2>Contact</h2>
+<p>[VOTRE NOM OU RAISON SOCIALE]</p>
+<p>[VOTRE E-MAIL]</p>
+</main></body>
+</html>

@@ -1,0 +1,6 @@
+Première version de Flux.
+• Débit en direct, canal par canal : Wi-Fi, mobile, USB, Bluetooth.
+• Part de chaque application pendant la capture.
+• Capture en arrière-plan avec notification et bouton STOP.
+• Historique des captures, si vous l'activez.
+• Rien n'est enregistré par défaut, rien n'est envoyé.

@@ -1,0 +1,33 @@
+# Élargir (ou arrêter) le déploiement progressif en production, sans la Play Console.
+#
+#   Actions › « Déploiement progressif » › Run workflow › fraction (0.5, 1 pour tout le monde)
+#   ou « halt » pour suspendre la version en cours de déploiement.
+
+name: Déploiement progressif
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Que faire de la version en cours de déploiement en production"
+        type: choice
+        options: [fraction, halt]
+        default: fraction
+      fraction:
+        description: "Part des utilisateurs (0.05 à 1 ; 1 = déploiement complet)"
+        type: string
+        default: "0.5"
+
+jobs:
+  rollout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet google-auth requests
+      - name: Mettre à jour le déploiement
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: python tool/play_rollout.py com.oseeeb.flux ${{ inputs.action }} ${{ inputs.fraction }}

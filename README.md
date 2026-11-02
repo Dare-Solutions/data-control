@@ -97,12 +97,24 @@ test/                       tests du calcul, du format et du parcours GO → STO
 
 ## Publication sur Google Play
 
-Google Play demande un **AAB signé** avec une clé d'envoi (upload key) qui doit rester la même pour toute la vie de l'app.
+Principe : le code est poussé sur GitHub, le pipeline fait le reste. La Play Console ne sert qu'à la mise en place initiale (voir `docs/play/console.md`).
 
-- La clé n'est **jamais dans le dépôt** (`.gitignore`). Sur GitHub Actions, le job « AAB signé pour Google Play » la lit dans les secrets du dépôt : `UPLOAD_KEYSTORE_BASE64` (le fichier `.jks` encodé en base64), `UPLOAD_KEYSTORE_PASSWORD` et `UPLOAD_KEY_ALIAS` (`flux`). Sans ces secrets, le job ne construit rien et le dit.
-- Sur un poste, créer `android/key.properties` (ignoré par git) avec `storeFile`, `storePassword`, `keyAlias`, `keyPassword`, puis `flutter build appbundle --release`.
-- L'AAB est publié en artefact `flux-aab` à chaque envoi sur `main`. Pensez à augmenter `version:` dans `pubspec.yaml` (le `+N` est le code de version, qui doit augmenter à chaque envoi sur Play).
-- Déclarations à faire dans Play Console : l'accès **Données d'utilisation** (`PACKAGE_USAGE_STATS`, formulaire « Autorisations sensibles ») et le **service au premier plan « usage spécial »** (expliquer : mesure du débit réseau lancée et arrêtée par l'utilisateur).
+```
+push sur main  →  flutter analyze + test  →  AAB signé  →  piste interne (Google Play)
+tag vX.Y.Z     →  idem                    →  AAB signé  →  production, 20 % des utilisateurs
+Actions › « Déploiement progressif »       →  50 %, 100 %, ou suspension
+```
+
+- **Clé d'envoi** (upload key) : jamais dans le dépôt (`.gitignore`). Secrets GitHub `UPLOAD_KEYSTORE_BASE64` (le `.jks` en base64), `UPLOAD_KEYSTORE_PASSWORD`, `UPLOAD_KEY_ALIAS` (`flux`). Gardez une copie du `.jks` hors de GitHub : Play App Signing permet de la remplacer en cas de perte, mais avec délai.
+- **Compte de service Google Play** : secret `PLAY_SERVICE_ACCOUNT_JSON` (le contenu du fichier JSON). Création : Google Cloud › IAM › Comptes de service › créer, puis « Clés » › ajouter une clé JSON ; activer l'API « Google Play Android Developer » ; dans Play Console › Utilisateurs et autorisations, inviter l'adresse du compte de service avec les droits de publication en test et en production sur l'app.
+- **Versions** : le nom de version vient du tag (`v1.2.3`) ou de `pubspec.yaml` ; le code de version est `100 + numéro d'exécution du workflow`, donc toujours nouveau. Les notes de version sont dans `distribution/whatsnew/whatsnew-fr-FR` (500 caractères max.).
+- **Sans les secrets**, les workflows le disent et ne publient rien ; `build.yml` continue de produire l'APK d'essai et, si la clé est là, l'AAB (`flux-aab`).
+- **Sur un poste** : `android/key.properties` (ignoré par git) avec `storeFile`, `storePassword`, `keyAlias`, `keyPassword`, puis `flutter build appbundle --release`.
+- **Fiche et formulaires** : textes dans `docs/play/fiche.md`, réponses dans `docs/play/console.md`, politique dans `docs/play/politique-de-confidentialite.md` (et `.html` à héberger).
+
+### Héberger la politique de confidentialité
+
+Play Console demande une URL publique. Ce dépôt étant privé, GitHub Pages n'est pas disponible dessus (sauf abonnement). Deux solutions : un petit dépôt public (`flux-site`) avec GitHub Pages qui sert `politique-de-confidentialite.html`, ou tout hébergement web dont vous disposez. L'URL ne doit plus changer ensuite.
 
 ## Logo et icône
 
