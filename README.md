@@ -95,6 +95,15 @@ ios/Runner/TrafficPlugin.swift                  lecture des compteurs iOS
 test/                       tests du calcul, du format et du parcours GO → STOP
 ```
 
+## Publication sur Google Play
+
+Google Play demande un **AAB signé** avec une clé d'envoi (upload key) qui doit rester la même pour toute la vie de l'app.
+
+- La clé n'est **jamais dans le dépôt** (`.gitignore`). Sur GitHub Actions, le job « AAB signé pour Google Play » la lit dans les secrets du dépôt : `UPLOAD_KEYSTORE_BASE64` (le fichier `.jks` encodé en base64), `UPLOAD_KEYSTORE_PASSWORD` et `UPLOAD_KEY_ALIAS` (`flux`). Sans ces secrets, le job ne construit rien et le dit.
+- Sur un poste, créer `android/key.properties` (ignoré par git) avec `storeFile`, `storePassword`, `keyAlias`, `keyPassword`, puis `flutter build appbundle --release`.
+- L'AAB est publié en artefact `flux-aab` à chaque envoi sur `main`. Pensez à augmenter `version:` dans `pubspec.yaml` (le `+N` est le code de version, qui doit augmenter à chaque envoi sur Play).
+- Déclarations à faire dans Play Console : l'accès **Données d'utilisation** (`PACKAGE_USAGE_STATS`, formulaire « Autorisations sensibles ») et le **service au premier plan « usage spécial »** (expliquer : mesure du débit réseau lancée et arrêtée par l'utilisateur).
+
 ## Logo et icône
 
 Le logo part de la proposition d'origine (`docs/logo/proposition_originale.webp`), recolorée aux couleurs de l'app (vert citron `#C6F432` et blanc sur fond `#0B0F1A`) par `tool/recolor_logo.py`.

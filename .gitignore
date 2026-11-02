@@ -46,3 +46,11 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Clé d'envoi Google Play et mots de passe : jamais dans le dépôt.
+.secrets/
+*.jks
+*.keystore
+*.b64
+password.txt
+android/key.properties

@@ -1,8 +1,25 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+// Clé d'envoi (upload key) pour Google Play. Jamais dans le dépôt : soit
+// android/key.properties (sur un poste), soit des variables d'environnement
+// (sur GitHub Actions, depuis les secrets). Sans elle, signature de débogage.
+val keyProperties = Properties().apply {
+    val f = rootProject.file("key.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+val uploadStoreFile = (keyProperties.getProperty("storeFile") ?: System.getenv("UPLOAD_KEYSTORE_PATH"))
+    ?.let { rootProject.file(it) }
+    ?.takeIf { it.exists() }
+val uploadStorePassword = keyProperties.getProperty("storePassword") ?: System.getenv("UPLOAD_KEYSTORE_PASSWORD")
+val uploadKeyAlias = keyProperties.getProperty("keyAlias") ?: System.getenv("UPLOAD_KEY_ALIAS") ?: "flux"
+val uploadKeyPassword = keyProperties.getProperty("keyPassword") ?: uploadStorePassword
+val hasUploadKey = uploadStoreFile != null && uploadStorePassword != null
 
 android {
     namespace = "com.oseeeb.flux"
@@ -15,7 +32,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.oseeeb.flux"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -29,11 +45,21 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (hasUploadKey) {
+            create("upload") {
+                storeFile = uploadStoreFile
+                storePassword = uploadStorePassword
+                keyAlias = uploadKeyAlias
+                keyPassword = uploadKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Clé d'envoi si elle est fournie, sinon clé de débogage (essais).
+            signingConfig = signingConfigs.getByName(if (hasUploadKey) "upload" else "debug")
         }
     }
 }
