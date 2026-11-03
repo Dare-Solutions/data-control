@@ -65,5 +65,5 @@ Si cette politique change, la nouvelle version sera publiée à la même adresse
 
 ## Contact
 
-[VOTRE NOM OU RAISON SOCIALE]
-[VOTRE E-MAIL]
+Dare-solutions  
+<ebouaepane@gmail.com>

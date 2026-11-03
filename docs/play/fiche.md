@@ -56,7 +56,7 @@ Flux est fait pour tout le monde, de 10 à 55 ans et au-delà : de gros chiffres
 - Type : Application
 - Catégorie : Outils
 - Tags (suggestions) : Gestion des données, Surveillance du réseau, Utilitaires
-- E-mail de contact : [VOTRE E-MAIL]
+- E-mail de contact : ebouaepane@gmail.com
 - Site web : [VOTRE SITE, facultatif]
 - Politique de confidentialité : l'URL où vous hébergez `docs/play/politique-de-confidentialite.html`
 
